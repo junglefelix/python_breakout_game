@@ -1,0 +1,11 @@
+[
+
+  
+
+    {"x": 480, "y": 170, "color": "RED","hits" :5},
+	{"x": 560, "y": 170, "color": "BLACK2","hits" :-1},
+    {"x": 640, "y": 170, "color": "LIGHT_GREEN","hits" :2}
+
+
+  
+]
