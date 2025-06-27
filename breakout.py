@@ -294,8 +294,7 @@ while running:
 
                 # Chance to spawn a powerup
                 if powerup_active == False:
-                    if random.random() < 0.9:  # 10% chance to spawn a powerup
-                        print("Powerup occurred!")
+                    if random.random() < 0.1:  # 10% chance to spawn a powerup
                         powerup_x = brick["rect"].x + (BRICK_WIDTH - powerup_shrink_width) // 2
                         powerup_y = brick["rect"].y + (BRICK_HEIGHT - powerup_shrink_height) // 2
                         powerup_rect = pygame.Rect(powerup_x, powerup_y, powerup_shrink_width, powerup_shrink_height)
