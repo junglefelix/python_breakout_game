@@ -7,7 +7,13 @@ level = 1
 load_next_level = True
 lives= 5
 powerup_visible = False
+
 powerup_active = False 
+piercing_active = False
+piercing_timer = 0
+
+
+
 pygame.init()
 
 pygame.mixer.init()  # Initialize the mixer (add this after screen setup)
@@ -192,9 +198,6 @@ while running:
             paddle_speed *= 1.5
             print(f"Powerup collected: {powerup_type['description']}")
             print(f"Paddle Speed: {paddle_speed}")
-        elif powerup_type["type"] == "brick_piercing":
-            # Logic to make the ball pierce through bricks (not implemented in this example)
-            print(f"Powerup collected: {powerup_type['description']}")
         elif powerup_type["type"] == "reverse_controls":
             # Logic to reverse paddle controls (not implemented in this example)
             print(f"Powerup collected: {powerup_type['description']}")
@@ -215,7 +218,11 @@ while running:
         elif powerup_type["type"] == "freeze_bricks":
             # Logic to freeze bricks for a short time (not implemented in this example)
             print(f"Powerup collected: {powerup_type['description']}")      
-
+        elif powerup_type["type"] == "brick_piercing":
+            # Activate piercing for 5 seconds
+            piercing_active = True
+            piercing_timer = pygame.time.get_ticks()
+            print(f"Powerup collected: {powerup_type['description']}")
         #paddle_x = max(0, paddle_x - paddle_width_increase // 2)  # Center the paddle
         #PADDLE_WIDTH = min(PADDLE_WIDTH, WIDTH - paddle_x)  # Ensure it doesn't go off screen
         #paddle_color = COLOR_MAP.get("LIGHT_GREEN")  # Change paddle color on powerup
@@ -301,27 +308,28 @@ while running:
                         powerup_visible = True
                         powerup_type = random.choice(powerups)
                         powerup_active = True
-                       # powerup_type = next((p for p in powerups if p["type"] == "multi_ball"), None)
+                        #powerup_type = next((p for p in powerups if p["type"] == "brick_piercing"), None)
+                # Only bounce if piercing is NOT active
+                if not piercing_active:
+                    # Calculate overlap on each side
+                    brick_rect = brick["rect"]
+                    top_overlap = ball_rect.bottom - brick_rect.top
+                    bottom_overlap = brick_rect.bottom - ball_rect.top
+                    left_overlap = ball_rect.right - brick_rect.left
+                    right_overlap = brick_rect.right - ball_rect.left
 
-                # Calculate overlap on each side
-                brick_rect = brick["rect"]
-                top_overlap = ball_rect.bottom - brick_rect.top
-                bottom_overlap = brick_rect.bottom - ball_rect.top
-                left_overlap = ball_rect.right - brick_rect.left
-                right_overlap = brick_rect.right - ball_rect.left
+                    # Find the smallest overlap to determine the collision side
+                    min_overlap = min(top_overlap, bottom_overlap, left_overlap, right_overlap)
 
-                # Find the smallest overlap to determine the collision side
-                min_overlap = min(top_overlap, bottom_overlap, left_overlap, right_overlap)
-
-                # Check direction of ball movement and overlap to confirm collision side
-                if min_overlap == top_overlap and ball.dy > 0:
-                    ball.bounce_vertical()
-                elif min_overlap == bottom_overlap and ball.dy < 0:
-                    ball.bounce_vertical()
-                elif min_overlap == left_overlap and ball.dx > 0:
-                    ball.bounce_horizontal()
-                elif min_overlap == right_overlap and ball.dx < 0:
-                    ball.bounce_horizontal()
+                    # Check direction of ball movement and overlap to confirm collision side
+                    if min_overlap == top_overlap and ball.dy > 0:
+                        ball.bounce_vertical()
+                    elif min_overlap == bottom_overlap and ball.dy < 0:
+                        ball.bounce_vertical()
+                    elif min_overlap == left_overlap and ball.dx > 0:
+                        ball.bounce_horizontal()
+                    elif min_overlap == right_overlap and ball.dx < 0:
+                        ball.bounce_horizontal()
            
 
                 # Reduce brick hits and remove if destroyed
@@ -357,6 +365,12 @@ while running:
     # Draw bricks
     for brick in bricks:
         pygame.draw.rect(screen, brick["color"], brick["rect"])
+
+     # Handle piercing timer (deactivate after 5 seconds)
+    if piercing_active:
+        if pygame.time.get_ticks() - piercing_timer > 5000:
+            piercing_active = False
+
 
 
     text = font.render(f"lives:{lives}",True,COLOR_MAP.get("LIGHT_PINK"))  # Text, antialiasing, color
